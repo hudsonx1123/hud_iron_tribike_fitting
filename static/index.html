@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>三鐵車 Fitting 分析</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <h1>三鐵車 Fitting 分析</h1>
+  <nav>
+    <button data-tab="list" class="active">騎乘紀錄</button>
+    <button data-tab="analyze" disabled>分析</button>
+    <button data-tab="compare">比較</button>
+  </nav>
+</header>
+
+<main>
+<section id="tab-list">
+  <details class="card" id="upload-card" open>
+    <summary>上傳新影片</summary>
+    <form id="upload-form">
+      <div class="grid2">
+        <label>名稱<input name="name" placeholder="例如:10/16 外騎 座墊+5mm"></label>
+        <label>側面影片<input type="file" name="video" accept="video/*" required></label>
+      </div>
+      <h4>這次的車子設定(選填,之後可再改)</h4>
+      <div class="grid3" id="setup-fields"></div>
+      <h4>成績 / 感受(選填,騎完再補也行)</h4>
+      <div class="grid3" id="perf-fields"></div>
+      <button class="primary" type="submit">上傳並分析</button>
+      <span id="upload-msg"></span>
+    </form>
+  </details>
+  <div id="session-list"></div>
+</section>
+
+<section id="tab-analyze" hidden>
+  <div class="split">
+    <div class="viewer">
+      <div class="bar">
+        <b id="a-title"></b>
+        <span id="a-status"></span>
+      </div>
+      <div class="canvas-wrap"><canvas id="cv"></canvas></div>
+      <input type="range" id="slider" min="0" max="0" value="0">
+      <canvas id="strip" height="14"></canvas>
+      <div class="bar controls">
+        <button id="b-play">▶</button>
+        <button id="b-prev">◀</button><button id="b-next">▶</button>
+        <span class="sep"></span>
+        <button id="b-pbdc" title="上一個 BDC">⏮BDC</button><button id="b-nbdc" title="下一個 BDC">BDC⏭</button>
+        <button id="b-ptdc">⏮TDC</button><button id="b-ntdc">TDC⏭</button>
+        <span id="a-frame"></span>
+      </div>
+      <div class="bar controls">
+        <button id="b-scale">📏 比例校正</button>
+        <button id="b-rs">設為起點</button><button id="b-re">設為終點</button><button id="b-rr">重設範圍</button>
+        <button id="b-reset">還原此影格偵測</button>
+        <label>側別
+          <select id="sel-side"><option value="left">左</option><option value="right">右</option></select>
+        </label>
+        <span id="a-hint" class="hint"></span>
+      </div>
+    </div>
+    <aside class="panel">
+      <div id="metrics-panel"></div>
+      <details class="card" open><summary>車子設定</summary><div class="grid2" id="a-setup"></div></details>
+      <details class="card"><summary>成績 / 感受</summary><div class="grid2" id="a-perf"></div></details>
+      <label class="card">備註<textarea id="a-notes" rows="3"></textarea></label>
+      <button class="primary" id="b-save">儲存</button> <span id="save-msg"></span>
+    </aside>
+  </div>
+</section>
+
+<section id="tab-compare" hidden>
+  <p class="hint">在「騎乘紀錄」勾選要比較的紀錄,再按比較(依建立時間排序)。</p>
+  <div id="compare-out"></div>
+</section>
+</main>
+<script src="/static/app.js"></script>
+</body>
+</html>

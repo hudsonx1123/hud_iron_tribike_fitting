@@ -1,0 +1,10 @@
+{
+  "_note": "Target ranges are starting points from fitter articles / literature, not validated standards. Edit freely. confidence: literature | rule_of_thumb | tracked_only",
+  "knee_flexion_bdc": {"label": "膝彎曲角 @BDC", "unit": "°", "low": 25, "high": 35, "ideal": 30, "confidence": "literature"},
+  "hip_angle": {"label": "髖角 (軀幹-大腿)", "unit": "°", "low": 95, "high": 105, "ideal": 100, "confidence": "rule_of_thumb"},
+  "elbow_angle": {"label": "手肘角", "unit": "°", "low": 85, "high": 105, "ideal": 95, "confidence": "rule_of_thumb"},
+  "upper_arm_angle": {"label": "上臂偏離垂直 (向前為正)", "unit": "°", "low": -5, "high": 20, "ideal": 8, "confidence": "rule_of_thumb"},
+  "knee_elbow_gap_mm": {"label": "膝-手肘最小間距", "unit": "mm", "low": 40, "high": 70, "ideal": 55, "confidence": "rule_of_thumb"},
+  "torso_angle": {"label": "軀幹對水平角", "unit": "°", "low": null, "high": null, "ideal": null, "confidence": "tracked_only"},
+  "ankle_angle_bdc": {"label": "踝角 @BDC", "unit": "°", "low": null, "high": null, "ideal": null, "confidence": "tracked_only"}
+}
