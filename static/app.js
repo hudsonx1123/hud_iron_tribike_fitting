@@ -48,7 +48,7 @@ async function loadList() {
     const status = m.status === "ready" ? "" :
       m.status === "error" ? `<span class="low">失敗:${esc(m.error)}</span>` :
       `<span class="tag">分析中 ${(m.progress * 100).toFixed(0)}%</span>`;
-    const chips = [["knee_flexion_bdc", "膝@BDC"], ["hip_angle", "髖"], ["elbow_angle", "肘"], ["torso_angle", "軀幹"]]
+    const chips = [["knee_flexion_bdc", "膝@BDC"], ["hip_closed_tdc", "髖@TDC"], ["shoulder_angle", "肩"], ["torso_angle", "軀幹"]]
       .filter(([k]) => s[k] !== undefined).map(([k, l]) => `<span class="tag">${l} ${f1(s[k])}°</span>`).join(" ");
     return `<div class="card srow">
       <label class="srow" style="gap:10px"><input type="checkbox" class="chk cmp" value="${m.id}" ${m.status === "ready" ? "" : "disabled"}>
@@ -127,10 +127,12 @@ function renderMetrics() {
       <span class="hint">(粗估,沿腿方向;2D 誤差可能數 mm 以上)</span></div>`;
   }
   if (a.others.length) h += `<div class="card"><b>其他待調整</b><ul>${a.others.map((o) => `<li>${esc(o.text)}</li>`).join("")}</ul></div>`;
+  if (a.hints.length) h += `<div class="card"><b>參考提示</b><span class="hint">(不列入調整順序)</span><ul>${a.hints.map((o) => `<li>${esc(o.text)}</li>`).join("")}</ul></div>`;
   if (a.noise_note.length) h += `<div class="hint noise">偏離但小於量測誤差,暫不建議動:${a.noise_note.map(esc).join("、")}</div>`;
   h += `<div class="card scroll"><table><tr><th>指標</th><th class="num">數值</th><th>目標</th></tr>` +
     a.items.map((i) => {
-      const tgt = i.low !== null && i.high !== null ? `${i.low}–${i.high}${i.unit}` : "追蹤";
+      const tgt = i.low !== null && i.high !== null ? `${i.low}–${i.high}${i.unit}` :
+        i.low !== null ? `≥ ${i.low}${i.unit}` : i.high !== null ? `≤ ${i.high}${i.unit}` : "追蹤";
       const cls = i.within_noise ? "noise" : i.status;
       return `<tr><td>${esc(i.label)}${i.confidence === "rule_of_thumb" ? ' <span class="tag" title="經驗法則,非驗證標準">經驗</span>' : ""}</td>
         <td class="num ${cls}">${f1(i.value)}${esc(i.unit)} <span class="hint">±${f1(i.std)} (${i.n})</span></td><td class="hint">${tgt}</td></tr>`;
@@ -323,8 +325,8 @@ async function loadCompare(ids) {
     return `<tr><td>${esc(labelOf(k))}</td>${vals.map((v) => `<td class="num">${v === undefined ? "–" : isFinite(parseFloat(v)) && delta ? f1(v) : esc(v)}</td>`).join("")}
       <td class="num hint">${d === null ? "" : (d > 0 ? "+" : "") + f1(d)}</td></tr>`;
   }).join("");
-  const mkeys = Object.keys(R).concat(["hip_angle_tdc", "leg_extension_mm"]);
-  const lab = { hip_angle_tdc: "髖角 @TDC", leg_extension_mm: "髖-踝距離 @BDC (mm)" };
+  const mkeys = Object.keys(R).concat(["leg_extension_mm"]);
+  const lab = { leg_extension_mm: "髖-踝距離 @BDC (mm)" };
   $("#compare-out").innerHTML = `<div class="card scroll"><table>
     <tr><th></th>${rows.map((r) => `<th class="num">${esc(r.name)}<br><span class="hint">${esc(r.created)}</span></th>`).join("")}<th class="num">Δ 最後−最先</th></tr>
     ${mk("車子設定", FIELDS.setup.map((x) => x[0]), (k) => FIELDS.setup.find((x) => x[0] === k)[1], (r, k) => r.setup[k], true)}

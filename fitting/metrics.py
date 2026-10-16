@@ -18,15 +18,19 @@ def series(lm, w, h, side, facing):
     P = {k: px[:, v] for k, v in ix.items()}
     torso_v = P["shoulder"] - P["hip"]
     arm_v = P["elbow"] - P["shoulder"]
+    fore_v = P["wrist"] - P["elbow"]
     return dict(
         knee_int=_angle(P["hip"], P["knee"], P["ankle"]),
         hip_int=_angle(P["shoulder"], P["hip"], P["knee"]),
+        shoulder_int=_angle(P["hip"], P["shoulder"], P["elbow"]),
         elbow_int=_angle(P["shoulder"], P["elbow"], P["wrist"]),
         ankle_int=_angle(P["knee"], P["ankle"], P["toe"]),
         # 軀幹對水平:0=平躺,90=直立
         torso=np.degrees(np.arctan2(-torso_v[:, 1], torso_v[:, 0] * facing)),
         # 上臂偏離垂直:向前為正
         upper_arm=np.degrees(np.arctan2(arm_v[:, 0] * facing, arm_v[:, 1])),
+        # 前臂對水平:手腕高於手肘為正
+        forearm=np.degrees(np.arctan2(-fore_v[:, 1], fore_v[:, 0] * facing)),
         knee_elbow_px=np.linalg.norm(P["knee"] - P["elbow"], axis=-1),
         thigh_px=np.linalg.norm(P["hip"] - P["knee"], axis=-1),
         shank_px=np.linalg.norm(P["knee"] - P["ankle"], axis=-1),
@@ -84,10 +88,12 @@ def compute(lm, w, h, fps, side, facing, rng=None, px_per_mm=None):
     m = {}
     m["knee_flexion_bdc"] = _agg(180 - S["knee_int"][bdc])
     m["ankle_angle_bdc"] = _agg(S["ankle_int"][bdc])
-    m["hip_angle"] = _agg(S["hip_int"][sl])
-    m["hip_angle_tdc"] = _agg(S["hip_int"][tdc])
+    # 閉合髖角:TDC 時的肩-髖-膝 (沿大腿量,40-45° 這類標準的量法)
+    m["hip_closed_tdc"] = _agg(S["hip_int"][tdc])
     m["elbow_angle"] = _agg(S["elbow_int"][sl])
+    m["shoulder_angle"] = _agg(S["shoulder_int"][sl])
     m["upper_arm_angle"] = _agg(S["upper_arm"][sl])
+    m["forearm_angle"] = _agg(S["forearm"][sl])
     m["torso_angle"] = _agg(S["torso"][sl])
     if px_per_mm:
         m["knee_elbow_gap_mm"] = _agg(S["knee_elbow_px"][tdc] / px_per_mm)

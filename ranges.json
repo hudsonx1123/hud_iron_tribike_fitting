@@ -1,10 +1,21 @@
 {
-  "_note": "Target ranges are starting points from fitter articles / literature, not validated standards. Edit freely. confidence: literature | rule_of_thumb | tracked_only",
-  "knee_flexion_bdc": {"label": "膝彎曲角 @BDC", "unit": "°", "low": 25, "high": 35, "ideal": 30, "confidence": "literature"},
-  "hip_angle": {"label": "髖角 (軀幹-大腿)", "unit": "°", "low": 95, "high": 105, "ideal": 100, "confidence": "rule_of_thumb"},
-  "elbow_angle": {"label": "手肘角", "unit": "°", "low": 85, "high": 105, "ideal": 95, "confidence": "rule_of_thumb"},
-  "upper_arm_angle": {"label": "上臂偏離垂直 (向前為正)", "unit": "°", "low": -5, "high": 20, "ideal": 8, "confidence": "rule_of_thumb"},
-  "knee_elbow_gap_mm": {"label": "膝-手肘最小間距", "unit": "mm", "low": 40, "high": 70, "ideal": 55, "confidence": "rule_of_thumb"},
-  "torso_angle": {"label": "軀幹對水平角", "unit": "°", "low": null, "high": null, "ideal": null, "confidence": "tracked_only"},
-  "ankle_angle_bdc": {"label": "踝角 @BDC", "unit": "°", "low": null, "high": null, "ideal": null, "confidence": "tracked_only"}
+  "_note": "Target ranges are starting points from fitter systems / literature, not validated standards. Edit freely. low or high may be null (one-sided). confidence: literature | rule_of_thumb | tracked_only. role: fix (drives advice) | hint (shown as a note only) | tracked (no judgement).",
+  "_sources": {
+    "knee_flexion_bdc": "Dynamic 2D at BDC ~8° above static Holmes 25-35°; suggested 33-43° (Acta Bioeng Biomech 2019). Retül ~35-40°.",
+    "hip_closed_tdc": "Closed hip angle at top of stroke >=40°, 45° preferred (Working Triathlete 2023; BikeFittr 35-45°). Measured along the femur (shoulder-hip-knee): the article says pedal, but shoulder-hip-pedal at TDC is ~100°, so 40-45° only fits the femur line.",
+    "torso_angle": "Velogic: elite 10-15°, general 20-30°; BikeFittr 20-35°, <20° linked to neck/shoulder pain.",
+    "shoulder_angle": "Velogic tri metrics: shoulder angle avg 75-100°.",
+    "forearm_angle": "Velogic forearm 0-20° (start 5-10°); high-hands trend 5-25° extension tilt.",
+    "upper_arm_angle": "Upper arm vertical to 10-20° forward (fitter guides).",
+    "knee_elbow_gap_mm": "No published range; only a clearance check."
+  },
+  "knee_flexion_bdc": {"label": "膝彎曲角 @BDC (動態)", "unit": "°", "low": 33, "high": 43, "ideal": 38, "confidence": "literature", "role": "fix"},
+  "hip_closed_tdc": {"label": "閉合髖角 @TDC (肩-髖-膝)", "unit": "°", "low": 40, "high": null, "ideal": 45, "confidence": "rule_of_thumb", "role": "fix"},
+  "knee_elbow_gap_mm": {"label": "膝-手肘最小間距 @TDC", "unit": "mm", "low": 25, "high": null, "ideal": null, "confidence": "rule_of_thumb", "role": "fix"},
+  "shoulder_angle": {"label": "肩角 (軀幹-上臂)", "unit": "°", "low": 75, "high": 100, "ideal": 88, "confidence": "rule_of_thumb", "role": "fix"},
+  "upper_arm_angle": {"label": "上臂偏離垂直 (向前為正)", "unit": "°", "low": -5, "high": 20, "ideal": 8, "confidence": "rule_of_thumb", "role": "fix"},
+  "torso_angle": {"label": "軀幹對水平角", "unit": "°", "low": 20, "high": 35, "ideal": null, "confidence": "rule_of_thumb", "role": "hint"},
+  "forearm_angle": {"label": "前臂上翹角 (對水平)", "unit": "°", "low": 0, "high": 25, "ideal": null, "confidence": "rule_of_thumb", "role": "hint"},
+  "elbow_angle": {"label": "手肘角", "unit": "°", "low": null, "high": null, "ideal": null, "confidence": "tracked_only", "role": "tracked"},
+  "ankle_angle_bdc": {"label": "踝角 @BDC", "unit": "°", "low": null, "high": null, "ideal": null, "confidence": "tracked_only", "role": "tracked"}
 }
