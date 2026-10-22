@@ -20,9 +20,10 @@ const IDX = { left: { ear: 7, shoulder: 11, elbow: 13, wrist: 15, hip: 23, knee:
 // ---------- tabs ----------
 function showTab(t) {
   document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("active", b.dataset.tab === t));
-  ["list", "analyze", "compare"].forEach((x) => ($("#tab-" + x).hidden = x !== t));
+  ["list", "analyze", "compare", "pros"].forEach((x) => ($("#tab-" + x).hidden = x !== t));
   if (t !== "analyze") stopPlay();
   if (t === "list") loadList();
+  if (t === "pros") loadPros();
 }
 document.querySelectorAll("nav button").forEach((b) => (b.onclick = () => showTab(b.dataset.tab)));
 

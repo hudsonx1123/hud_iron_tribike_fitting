@@ -93,7 +93,7 @@ def get_session(sid):
 def patch(sid):
     meta = _meta_or_404(sid)
     body = request.get_json()
-    for k in ("name", "setup", "perf", "notes", "scale", "range", "side"):
+    for k in ("name", "setup", "perf", "notes", "scale", "range", "side", "pro", "short", "lowconf"):
         if k in body:
             meta[k] = body[k]
     if "side" in body and meta["status"] == "ready":

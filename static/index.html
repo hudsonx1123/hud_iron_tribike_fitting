@@ -13,6 +13,7 @@
     <button data-tab="list" class="active">騎乘紀錄</button>
     <button data-tab="analyze" disabled>分析</button>
     <button data-tab="compare">比較</button>
+    <button data-tab="pros">職業對照</button>
   </nav>
 </header>
 
@@ -78,7 +79,13 @@
   <p class="hint">在「騎乘紀錄」勾選要比較的紀錄,再按比較(依建立時間排序)。</p>
   <div id="compare-out"></div>
 </section>
+<section id="tab-pros" hidden>
+  <div class="bar"><label>我的紀錄 <select id="pros-you"></select></label>
+    <span class="hint">選手資料來自標記為「職業選手」的紀錄;角度皆為側面影片分析值。</span></div>
+  <div id="pros-out"></div>
+</section>
 </main>
 <script src="/static/app.js"></script>
+<script src="/static/pros.js"></script>
 </body>
 </html>
