@@ -8,29 +8,30 @@
 </head>
 <body>
 <header>
-  <h1>三鐵車 Fitting 分析</h1>
+  <h1 data-i18n="app.title">三鐵車 Fitting 分析</h1>
   <nav>
-    <button data-tab="list" class="active">騎乘紀錄</button>
-    <button data-tab="analyze" disabled>分析</button>
-    <button data-tab="compare">比較</button>
-    <button data-tab="pros">職業對照</button>
+    <button data-tab="list" class="active" data-i18n="tab.list">騎乘紀錄</button>
+    <button data-tab="analyze" disabled data-i18n="tab.analyze">分析</button>
+    <button data-tab="compare" data-i18n="tab.compare">比較</button>
+    <button data-tab="pros" data-i18n="tab.pros">職業對照</button>
   </nav>
+  <button id="lang-btn" type="button" class="langbtn">EN</button>
 </header>
 
 <main>
 <section id="tab-list">
   <details class="card" id="upload-card" open>
-    <summary>上傳新影片</summary>
+    <summary data-i18n="up.title">上傳新影片</summary>
     <form id="upload-form">
       <div class="grid2">
-        <label>名稱<input name="name" placeholder="例如:10/16 外騎 座墊+5mm"></label>
-        <label>側面影片<input type="file" name="video" accept="video/*" required></label>
+        <label><span data-i18n="up.name">名稱</span><input name="name" data-i18n-ph="up.ph" placeholder="例如:10/16 外騎 座墊+5mm"></label>
+        <label><span data-i18n="up.video">側面影片</span><input type="file" name="video" accept="video/*" required></label>
       </div>
-      <h4>這次的車子設定(選填,之後可再改)</h4>
+      <h4 data-i18n="up.setup">這次的車子設定(選填,之後可再改)</h4>
       <div class="grid3" id="setup-fields"></div>
-      <h4>成績 / 感受(選填,騎完再補也行)</h4>
+      <h4 data-i18n="up.perf">成績 / 感受(選填,騎完再補也行)</h4>
       <div class="grid3" id="perf-fields"></div>
-      <button class="primary" type="submit">上傳並分析</button>
+      <button class="primary" type="submit" data-i18n="up.submit">上傳並分析</button>
       <span id="upload-msg"></span>
     </form>
   </details>
@@ -51,40 +52,41 @@
         <button id="b-play">▶</button>
         <button id="b-prev">◀</button><button id="b-next">▶</button>
         <span class="sep"></span>
-        <button id="b-pbdc" title="上一個 BDC">⏮BDC</button><button id="b-nbdc" title="下一個 BDC">BDC⏭</button>
+        <button id="b-pbdc" title="上一個 BDC" data-i18n-title="an.prevBdc">⏮BDC</button><button id="b-nbdc" title="下一個 BDC" data-i18n-title="an.nextBdc">BDC⏭</button>
         <button id="b-ptdc">⏮TDC</button><button id="b-ntdc">TDC⏭</button>
         <span id="a-frame"></span>
       </div>
       <div class="bar controls">
-        <button id="b-scale">📏 比例校正</button>
-        <button id="b-rs">設為起點</button><button id="b-re">設為終點</button><button id="b-rr">重設範圍</button>
-        <button id="b-reset">還原此影格偵測</button>
-        <label>側別
-          <select id="sel-side"><option value="left">左</option><option value="right">右</option></select>
+        <button id="b-scale" data-i18n="an.scale">📏 比例校正</button>
+        <button id="b-rs" data-i18n="an.rs">設為起點</button><button id="b-re" data-i18n="an.re">設為終點</button><button id="b-rr" data-i18n="an.rr">重設範圍</button>
+        <button id="b-reset" data-i18n="an.reset">還原此影格偵測</button>
+        <label><span data-i18n="an.side">側別</span>
+          <select id="sel-side"><option value="left" data-i18n="an.left">左</option><option value="right" data-i18n="an.right">右</option></select>
         </label>
         <span id="a-hint" class="hint"></span>
       </div>
     </div>
     <aside class="panel">
       <div id="metrics-panel"></div>
-      <details class="card" open><summary>車子設定</summary><div class="grid2" id="a-setup"></div></details>
-      <details class="card"><summary>成績 / 感受</summary><div class="grid2" id="a-perf"></div></details>
-      <label class="card">備註<textarea id="a-notes" rows="3"></textarea></label>
-      <button class="primary" id="b-save">儲存</button> <span id="save-msg"></span>
+      <details class="card" open><summary data-i18n="an.setup">車子設定</summary><div class="grid2" id="a-setup"></div></details>
+      <details class="card"><summary data-i18n="an.perf">成績 / 感受</summary><div class="grid2" id="a-perf"></div></details>
+      <label class="card"><span data-i18n="an.notes">備註</span><textarea id="a-notes" rows="3"></textarea></label>
+      <button class="primary" id="b-save" data-i18n="an.save">儲存</button> <span id="save-msg"></span>
     </aside>
   </div>
 </section>
 
 <section id="tab-compare" hidden>
-  <p class="hint">在「騎乘紀錄」勾選要比較的紀錄,再按比較(依建立時間排序)。</p>
+  <p class="hint" data-i18n="cmp.hint">在「騎乘紀錄」勾選要比較的紀錄,再按比較(依建立時間排序)。</p>
   <div id="compare-out"></div>
 </section>
 <section id="tab-pros" hidden>
-  <div class="bar"><label>我的紀錄 <select id="pros-you"></select></label>
-    <span class="hint">選手資料來自標記為「職業選手」的紀錄;角度皆為側面影片分析值。</span></div>
+  <div class="bar"><label><span data-i18n="pro.me">我的紀錄</span> <select id="pros-you"></select></label>
+    <span class="hint" data-i18n="pro.src">選手資料來自標記為「職業選手」的紀錄;角度皆為側面影片分析值。</span></div>
   <div id="pros-out"></div>
 </section>
 </main>
+<script src="/static/i18n.js"></script>
 <script src="/static/app.js"></script>
 <script src="/static/pros.js"></script>
 </body>

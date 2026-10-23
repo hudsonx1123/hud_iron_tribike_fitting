@@ -9,13 +9,13 @@
     "upper_arm_angle": "Upper arm vertical to 10-20° forward (fitter guides).",
     "knee_elbow_gap_mm": "No published range; only a clearance check."
   },
-  "knee_flexion_bdc": {"label": "膝彎曲角 @BDC (動態)", "unit": "°", "low": 33, "high": 43, "ideal": 38, "confidence": "literature", "role": "fix"},
-  "hip_closed_tdc": {"label": "閉合髖角 @TDC (肩-髖-膝)", "unit": "°", "low": 40, "high": null, "ideal": 45, "confidence": "rule_of_thumb", "role": "fix"},
-  "knee_elbow_gap_mm": {"label": "膝-手肘最小間距 @TDC", "unit": "mm", "low": 25, "high": null, "ideal": null, "confidence": "rule_of_thumb", "role": "fix"},
-  "shoulder_angle": {"label": "肩角 (軀幹-上臂)", "unit": "°", "low": 75, "high": 100, "ideal": 88, "confidence": "rule_of_thumb", "role": "fix"},
-  "upper_arm_angle": {"label": "上臂偏離垂直 (向前為正)", "unit": "°", "low": -5, "high": 20, "ideal": 8, "confidence": "rule_of_thumb", "role": "fix"},
-  "torso_angle": {"label": "軀幹對水平角", "unit": "°", "low": 20, "high": 35, "ideal": null, "confidence": "rule_of_thumb", "role": "hint"},
-  "forearm_angle": {"label": "前臂上翹角 (對水平)", "unit": "°", "low": 0, "high": 25, "ideal": null, "confidence": "rule_of_thumb", "role": "hint"},
-  "elbow_angle": {"label": "手肘角", "unit": "°", "low": null, "high": null, "ideal": null, "confidence": "tracked_only", "role": "tracked"},
-  "ankle_angle_bdc": {"label": "踝角 @BDC", "unit": "°", "low": null, "high": null, "ideal": null, "confidence": "tracked_only", "role": "tracked"}
+  "knee_flexion_bdc": {"label": "膝彎曲角 @BDC (動態)", "label_en": "Knee flexion @BDC (dynamic)", "unit": "°", "low": 33, "high": 43, "ideal": 38, "confidence": "literature", "role": "fix"},
+  "hip_closed_tdc": {"label": "閉合髖角 @TDC (肩-髖-膝)", "label_en": "Closed hip angle @TDC (shoulder-hip-knee)", "unit": "°", "low": 40, "high": null, "ideal": 45, "confidence": "rule_of_thumb", "role": "fix"},
+  "knee_elbow_gap_mm": {"label": "膝-手肘最小間距 @TDC", "label_en": "Min knee-elbow gap @TDC", "unit": "mm", "low": 25, "high": null, "ideal": null, "confidence": "rule_of_thumb", "role": "fix"},
+  "shoulder_angle": {"label": "肩角 (軀幹-上臂)", "label_en": "Shoulder angle (torso-upper arm)", "unit": "°", "low": 75, "high": 100, "ideal": 88, "confidence": "rule_of_thumb", "role": "fix"},
+  "upper_arm_angle": {"label": "上臂偏離垂直 (向前為正)", "label_en": "Upper arm from vertical (forward +)", "unit": "°", "low": -5, "high": 20, "ideal": 8, "confidence": "rule_of_thumb", "role": "fix"},
+  "torso_angle": {"label": "軀幹對水平角", "label_en": "Torso angle to horizontal", "unit": "°", "low": 20, "high": 35, "ideal": null, "confidence": "rule_of_thumb", "role": "hint"},
+  "forearm_angle": {"label": "前臂上翹角 (對水平)", "label_en": "Forearm tilt (to horizontal)", "unit": "°", "low": 0, "high": 25, "ideal": null, "confidence": "rule_of_thumb", "role": "hint"},
+  "elbow_angle": {"label": "手肘角", "label_en": "Elbow angle", "unit": "°", "low": null, "high": null, "ideal": null, "confidence": "tracked_only", "role": "tracked"},
+  "ankle_angle_bdc": {"label": "踝角 @BDC", "label_en": "Ankle angle @BDC", "unit": "°", "low": null, "high": null, "ideal": null, "confidence": "tracked_only", "role": "tracked"}
 }

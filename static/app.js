@@ -47,24 +47,24 @@ async function loadList() {
   el.innerHTML = ss.slice().reverse().map((m) => {
     const s = m.summary || {};
     const status = m.status === "ready" ? "" :
-      m.status === "error" ? `<span class="low">失敗:${esc(m.error)}</span>` :
-      `<span class="tag">分析中 ${(m.progress * 100).toFixed(0)}%</span>`;
-    const chips = [["knee_flexion_bdc", "膝@BDC"], ["hip_closed_tdc", "髖@TDC"], ["shoulder_angle", "肩"], ["torso_angle", "軀幹"]]
+      m.status === "error" ? `<span class="low">${esc(t("list.fail", { e: tErr(m.error) }))}</span>` :
+      `<span class="tag">${esc(t("list.analyzing", { p: (m.progress * 100).toFixed(0) }))}</span>`;
+    const chips = [["knee_flexion_bdc", t("list.knee")], ["hip_closed_tdc", t("list.hip")], ["shoulder_angle", t("list.shoulder")], ["torso_angle", t("list.torso")]]
       .filter(([k]) => s[k] !== undefined).map(([k, l]) => `<span class="tag">${l} ${f1(s[k])}°</span>`).join(" ");
     return `<div class="card srow">
       <label class="srow" style="gap:10px"><input type="checkbox" class="chk cmp" value="${m.id}" ${m.status === "ready" ? "" : "disabled"}>
         <span><b>${esc(m.name)}</b> <span class="meta">${esc(m.created)}</span> ${status}<br>${chips}</span></label>
-      <span>${m.status === "ready" ? `<button data-open="${m.id}">開啟</button>` : ""}
-      <button data-del="${m.id}">刪除</button></span></div>`;
-  }).join("") + (ss.length ? `<button id="b-compare" class="primary">比較勾選的紀錄</button>` : "<p class='hint'>還沒有紀錄,先上傳一支側面影片。</p>");
+      <span>${m.status === "ready" ? `<button data-open="${m.id}">${t("list.open")}</button>` : ""}
+      <button data-del="${m.id}">${t("list.del")}</button></span></div>`;
+  }).join("") + (ss.length ? `<button id="b-compare" class="primary">${t("list.compare")}</button>` : `<p class='hint'>${t("list.empty")}</p>`);
   el.querySelectorAll("[data-open]").forEach((b) => (b.onclick = () => openSession(b.dataset.open)));
   el.querySelectorAll("[data-del]").forEach((b) => (b.onclick = async () => {
-    if (confirm("刪除這筆紀錄(含影格與修正)?")) { await api("/api/sessions/" + b.dataset.del, { method: "DELETE" }); loadList(); }
+    if (confirm(t("list.confirmDel"))) { await api("/api/sessions/" + b.dataset.del, { method: "DELETE" }); loadList(); }
   }));
   const bc = $("#b-compare");
   if (bc) bc.onclick = () => {
     const ids = [...el.querySelectorAll(".cmp:checked")].map((c) => c.value);
-    if (ids.length < 2) return alert("至少勾選 2 筆");
+    if (ids.length < 2) return alert(t("list.min2"));
     showTab("compare"); loadCompare(ids);
   };
   if (ss.some((m) => m.status === "analyzing" || m.status === "uploaded")) listTimer = setTimeout(loadList, 2000);
@@ -77,9 +77,9 @@ $("#upload-form").onsubmit = async (e) => {
   fd.append("video", e.target.video.files[0]);
   fd.append("setup", JSON.stringify(readFields($("#setup-fields"), "setup")));
   fd.append("perf", JSON.stringify(readFields($("#perf-fields"), "perf")));
-  $("#upload-msg").textContent = "上傳中…";
+  $("#upload-msg").textContent = t("up.sending");
   try { await api("/api/sessions", { method: "POST", body: fd }); } catch (err) { $("#upload-msg").textContent = err.message; return; }
-  $("#upload-msg").textContent = "已上傳,背景分析中";
+  $("#upload-msg").textContent = t("up.done");
   e.target.reset(); loadList();
 };
 
@@ -88,7 +88,7 @@ async function openSession(sid) {
   stopPlay();
   S.sid = sid; S.imgs.clear();
   S.info = await api("/api/sessions/" + sid);
-  if (S.info.meta.status !== "ready") return alert("尚未分析完成");
+  if (S.info.meta.status !== "ready") return alert(t("an.notReady"));
   S.lm = await api(`/api/sessions/${sid}/landmarks`);
   S.frame = 0; S.mode = "edit";
   const m = S.info.meta;
@@ -105,7 +105,7 @@ async function openSession(sid) {
 }
 
 async function refreshMetrics() {
-  S.met = await api(`/api/sessions/${S.sid}/metrics`);
+  S.met = await api(langQS(`/api/sessions/${S.sid}/metrics`));
   S.info = { ...S.info, ...(await api("/api/sessions/" + S.sid)) };
   renderMetrics(); drawStrip(); draw();
 }
@@ -113,29 +113,29 @@ async function refreshMetrics() {
 function renderMetrics() {
   const r = S.met, a = r.advice, el = $("#metrics-panel");
   const cyc = r.bdc.length;
-  let h = `<div class="card"><b>偵測到 ${cyc} 個踏頻週期</b>${r.cadence ? `,踏頻約 ${r.cadence.toFixed(0)} rpm` : ""}
-    <span class="hint"> · 範圍 ${r.range[0]}–${r.range[1]} 影格 · ${r.px_per_mm ? "已校正比例" : "<span class='noise'>尚未校正比例(無 mm 數值)</span>"}</span>
-    ${cyc < 4 ? "<div class='noise'>週期偏少,數值可信度低;請確認影片或範圍。</div>" : ""}</div>`;
+  let h = `<div class="card"><b>${t("m.cycles", { n: cyc })}</b>${r.cadence ? t("m.cadence", { v: r.cadence.toFixed(0) }) : ""}
+    <span class="hint">${t("m.range", { a: r.range[0], b: r.range[1] })}${r.px_per_mm ? t("m.scaled") : `<span class='noise'>${t("m.unscaled")}</span>`}</span>
+    ${cyc < 4 ? `<div class='noise'>${t("m.fewCycles")}</div>` : ""}</div>`;
   if (a.fix_first) {
-    h += `<div class="fix"><b>先修這個</b>(一次只改一個變數)<br>${esc(a.fix_first.text)}
-      <span class="hint">偏離 ${a.fix_first.deviation}${esc(a.fix_first.unit)}</span></div>`;
+    h += `<div class="fix"><b>${t("m.fixFirst")}</b>${t("m.oneAtATime")}<br>${esc(a.fix_first.text)}
+      <span class="hint">${t("m.deviation", { d: a.fix_first.deviation, u: esc(a.fix_first.unit) })}</span></div>`;
   } else {
-    h += `<div class="fix" style="border-color:var(--ok)">沒有超出誤差範圍的項目。${a.items.length ? "" : "(尚無數據)"}</div>`;
+    h += `<div class="fix" style="border-color:var(--ok)">${t("m.allGood")}${a.items.length ? "" : t("m.noData")}</div>`;
   }
   if (a.saddle_delta_mm !== null) {
     const d = a.saddle_delta_mm;
-    h += `<div class="card">依幾何估算,要讓 BDC 膝彎曲達目標值:座墊約 <b>${d >= 0 ? "升高" : "降低"} ${Math.abs(d).toFixed(0)} mm</b>
-      <span class="hint">(粗估,沿腿方向;2D 誤差可能數 mm 以上)</span></div>`;
+    h += `<div class="card">${t("m.saddle", { dir: d >= 0 ? t("m.up") : t("m.down"), mm: Math.abs(d).toFixed(0) })}
+      <span class="hint">${t("m.saddleHint")}</span></div>`;
   }
-  if (a.others.length) h += `<div class="card"><b>其他待調整</b><ul>${a.others.map((o) => `<li>${esc(o.text)}</li>`).join("")}</ul></div>`;
-  if (a.hints.length) h += `<div class="card"><b>參考提示</b><span class="hint">(不列入調整順序)</span><ul>${a.hints.map((o) => `<li>${esc(o.text)}</li>`).join("")}</ul></div>`;
-  if (a.noise_note.length) h += `<div class="hint noise">偏離但小於量測誤差,暫不建議動:${a.noise_note.map(esc).join("、")}</div>`;
-  h += `<div class="card scroll"><table><tr><th>指標</th><th class="num">數值</th><th>目標</th></tr>` +
+  if (a.others.length) h += `<div class="card"><b>${t("m.others")}</b><ul>${a.others.map((o) => `<li>${esc(o.text)}</li>`).join("")}</ul></div>`;
+  if (a.hints.length) h += `<div class="card"><b>${t("m.hints")}</b><span class="hint">${t("m.hintsNote")}</span><ul>${a.hints.map((o) => `<li>${esc(o.text)}</li>`).join("")}</ul></div>`;
+  if (a.noise_note.length) h += `<div class="hint noise">${t("m.noise")}${a.noise_note.map(esc).join(t("sep"))}</div>`;
+  h += `<div class="card scroll"><table><tr><th>${t("m.metric")}</th><th class="num">${t("m.value")}</th><th>${t("m.target")}</th></tr>` +
     a.items.map((i) => {
       const tgt = i.low !== null && i.high !== null ? `${i.low}–${i.high}${i.unit}` :
-        i.low !== null ? `≥ ${i.low}${i.unit}` : i.high !== null ? `≤ ${i.high}${i.unit}` : "追蹤";
+        i.low !== null ? `≥ ${i.low}${i.unit}` : i.high !== null ? `≤ ${i.high}${i.unit}` : t("m.track");
       const cls = i.within_noise ? "noise" : i.status;
-      return `<tr><td>${esc(i.label)}${i.confidence === "rule_of_thumb" ? ' <span class="tag" title="經驗法則,非驗證標準">經驗</span>' : ""}</td>
+      return `<tr><td>${esc(i.label)}${i.confidence === "rule_of_thumb" ? ` <span class="tag" title="${esc(t("m.ruleTitle"))}">${t("m.rule")}</span>` : ""}</td>
         <td class="num ${cls}">${f1(i.value)}${esc(i.unit)} <span class="hint">±${f1(i.std)} (${i.n})</span></td><td class="hint">${tgt}</td></tr>`;
     }).join("") + `</table></div>`;
   el.innerHTML = h;
@@ -157,7 +157,7 @@ function goFrame(n) {
   S.frame = Math.max(0, Math.min(S.info.n - 1, n));
   $("#slider").value = S.frame;
   const ov = S.info.overrides || [];
-  $("#a-frame").textContent = `影格 ${S.frame}/${S.info.n - 1}${ov.includes(S.frame) ? " ✎已修正" : ""}`;
+  $("#a-frame").textContent = t("an.frame", { f: S.frame, n: S.info.n - 1 }) + (ov.includes(S.frame) ? t("an.fixed") : "");
   for (let k = 1; k <= 3; k++) if (S.frame + k < S.info.n) getImg(S.frame + k);
   draw();
 }
@@ -187,9 +187,9 @@ function draw() {
     const label = (p, txt) => { ctx.font = `${15 * u}px sans-serif`; const x = X(p) + 12 * u, y = Y(p) - 10 * u;
       ctx.fillStyle = "rgba(0,0,0,.65)"; const w = ctx.measureText(txt).width; ctx.fillRect(x - 3 * u, y - 15 * u, w + 6 * u, 20 * u);
       ctx.fillStyle = "#fff"; ctx.fillText(txt, x, y); };
-    label(P.knee, `膝彎曲 ${(180 - ang("hip", "knee", "ankle")).toFixed(0)}°`);
-    label(P.hip, `髖 ${ang("shoulder", "hip", "knee").toFixed(0)}°`);
-    label(P.elbow, `肘 ${ang("shoulder", "elbow", "wrist").toFixed(0)}°`);
+    label(P.knee, `${t("cv.knee")} ${(180 - ang("hip", "knee", "ankle")).toFixed(0)}°`);
+    label(P.hip, `${t("cv.hip")} ${ang("shoulder", "hip", "knee").toFixed(0)}°`);
+    label(P.elbow, `${t("cv.elbow")} ${ang("shoulder", "elbow", "wrist").toFixed(0)}°`);
     line("knee", "elbow", "#f472b6", 2, [8 * u, 6 * u]);
     if (S.met.px_per_mm) {
       const d = Math.hypot((P.knee[0] - P.elbow[0]) * W, (P.knee[1] - P.elbow[1]) * H) / S.met.px_per_mm;
@@ -203,7 +203,7 @@ function draw() {
     if (S.met.bdc.includes(S.frame)) badge("BDC", "#4ade80");
     else if (S.met.tdc.includes(S.frame)) badge("TDC", "#38bdf8");
     const r = S.info.meta.range;
-    if (r && (S.frame < r[0] || S.frame > r[1])) badge("範圍外", "#fb923c", 1);
+    if (r && (S.frame < r[0] || S.frame > r[1])) badge(t("cv.out"), "#fb923c", 1);
   }
   for (const k in P) {
     ctx.fillStyle = k === (S.drag && S.drag.name) ? "#fff" : "#ef4444";
@@ -236,7 +236,7 @@ cv.onpointerdown = (e) => {
   if (S.mode === "scale") {
     (S.scalePts ||= []).push([x, y]);
     if (S.scalePts.length === 2) {
-      const mm = parseFloat(prompt("這兩點的實際距離 (mm)?例:700c 輪胎外徑約 670–680、軸距等"));
+      const mm = parseFloat(prompt(t("an.scalePrompt")));
       if (mm > 0) {
         api("/api/sessions/" + S.sid, { method: "PATCH", json: { scale: { p1: S.scalePts[0], p2: S.scalePts[1], mm } } })
           .then((m) => { S.info.meta = m; refreshMetrics(); });
@@ -268,7 +268,7 @@ cv.onpointerup = async () => {
 
 function setMode(m) {
   S.mode = m; $("#b-scale").classList.toggle("on", m === "scale");
-  $("#a-hint").textContent = m === "scale" ? "在影像上點兩個已知距離的點(例如前輪最前緣與最後緣)" : "拖曳紅點修正關節;用 BDC/TDC 按鈕跳到關鍵影格檢查";
+  $("#a-hint").textContent = m === "scale" ? t("an.hintScale") : t("an.hintEdit");
   cv.style.cursor = m === "scale" ? "copy" : "crosshair";
 }
 
@@ -304,7 +304,7 @@ $("#sel-side").onchange = async (e) => {
 $("#b-save").onclick = async () => {
   const body = { setup: readFields($("#a-setup"), "setup"), perf: readFields($("#a-perf"), "perf"), notes: $("#a-notes").value };
   S.info.meta = await api("/api/sessions/" + S.sid, { method: "PATCH", json: body });
-  $("#save-msg").textContent = "已儲存"; setTimeout(() => ($("#save-msg").textContent = ""), 1500);
+  $("#save-msg").textContent = t("an.saved"); setTimeout(() => ($("#save-msg").textContent = ""), 1500);
 };
 document.addEventListener("keydown", (e) => {
   if ($("#tab-analyze").hidden || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && document.activeElement.type !== "range") return;
@@ -315,7 +315,9 @@ document.addEventListener("keydown", (e) => {
 window.addEventListener("resize", () => { if (S.met) drawStrip(); });
 
 // ---------- compare ----------
+let CMP_IDS = null;
 async function loadCompare(ids) {
+  CMP_IDS = ids;
   const rows = (await api("/api/compare?ids=" + ids.join(","))).sort((a, b) => a.created.localeCompare(b.created));
   const R = FIELDS.ranges;
   const mk = (title, keys, labelOf, get, delta) => `<tr><th colspan="${rows.length + 2}">${title}</th></tr>` + keys.map((k) => {
@@ -327,18 +329,41 @@ async function loadCompare(ids) {
       <td class="num hint">${d === null ? "" : (d > 0 ? "+" : "") + f1(d)}</td></tr>`;
   }).join("");
   const mkeys = Object.keys(R).concat(["leg_extension_mm"]);
-  const lab = { leg_extension_mm: "髖-踝距離 @BDC (mm)" };
+  const lab = { leg_extension_mm: t("cmp.legDist") };
   $("#compare-out").innerHTML = `<div class="card scroll"><table>
-    <tr><th></th>${rows.map((r) => `<th class="num">${esc(r.name)}<br><span class="hint">${esc(r.created)}</span></th>`).join("")}<th class="num">Δ 最後−最先</th></tr>
-    ${mk("車子設定", FIELDS.setup.map((x) => x[0]), (k) => FIELDS.setup.find((x) => x[0] === k)[1], (r, k) => r.setup[k], true)}
-    ${mk("量測指標", mkeys, (k) => (R[k] ? R[k].label : lab[k]), (r, k) => r.metrics[k], true)}
-    ${mk("成績 / 感受", FIELDS.perf.map((x) => x[0]), (k) => FIELDS.perf.find((x) => x[0] === k)[1], (r, k) => r.perf[k], true)}
+    <tr><th></th>${rows.map((r) => `<th class="num">${esc(r.name)}<br><span class="hint">${esc(r.created)}</span></th>`).join("")}<th class="num">${t("cmp.delta")}</th></tr>
+    ${mk(t("cmp.setup"), FIELDS.setup.map((x) => x[0]), (k) => FIELDS.setup.find((x) => x[0] === k)[1], (r, k) => r.setup[k], true)}
+    ${mk(t("cmp.metrics"), mkeys, (k) => (R[k] ? R[k].label : lab[k]), (r, k) => r.metrics[k], true)}
+    ${mk(t("cmp.perf"), FIELDS.perf.map((x) => x[0]), (k) => FIELDS.perf.find((x) => x[0] === k)[1], (r, k) => r.perf[k], true)}
   </table></div>`;
 }
 
+// ---------- language ----------
+async function setLang(l) {
+  const setupVals = readFields($("#setup-fields"), "setup"), perfVals = readFields($("#perf-fields"), "perf");
+  const aSetup = readFields($("#a-setup"), "setup"), aPerf = readFields($("#a-perf"), "perf");
+  LANG = l;
+  try { localStorage.setItem("lang", l); } catch (e) { /* ignore */ }
+  applyStaticI18n();
+  FIELDS = await api(langQS("/api/fields"));
+  $("#setup-fields").innerHTML = fieldInputs(FIELDS.setup, setupVals, "setup");
+  $("#perf-fields").innerHTML = fieldInputs(FIELDS.perf, perfVals, "perf");
+  if (S.info) {
+    $("#a-setup").innerHTML = fieldInputs(FIELDS.setup, aSetup, "setup");
+    $("#a-perf").innerHTML = fieldInputs(FIELDS.perf, aPerf, "perf");
+  }
+  setMode(S.mode);
+  if (!$("#tab-list").hidden) loadList();
+  if (!$("#tab-analyze").hidden && S.sid) { await refreshMetrics(); goFrame(S.frame); }
+  if (!$("#tab-compare").hidden && CMP_IDS) loadCompare(CMP_IDS);
+  if (!$("#tab-pros").hidden) loadPros();
+}
+$("#lang-btn").onclick = () => setLang(LANG === "en" ? "zh" : "en");
+
 // ---------- init ----------
 (async () => {
-  FIELDS = await api("/api/fields");
+  applyStaticI18n();
+  FIELDS = await api(langQS("/api/fields"));
   $("#setup-fields").innerHTML = fieldInputs(FIELDS.setup, {}, "setup");
   $("#perf-fields").innerHTML = fieldInputs(FIELDS.perf, {}, "perf");
   setMode("edit");

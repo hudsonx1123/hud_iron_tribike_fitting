@@ -35,6 +35,38 @@ PERF_FIELDS = [
 ]
 
 
-def load_ranges():
+SETUP_EN = {
+    "saddle_height_mm": "Saddle height (BB to saddle top) mm",
+    "saddle_setback_mm": "Saddle setback mm",
+    "saddle_tilt_deg": "Saddle tilt °",
+    "crank_length_mm": "Crank length mm",
+    "pad_stack_mm": "Pad stack mm",
+    "pad_reach_mm": "Pad reach mm",
+    "pad_width_mm": "Pad width mm",
+    "extension_length_mm": "Extension length mm",
+    "extension_angle_deg": "Extension upward tilt °",
+    "cleat_note": "Cleat position notes",
+}
+PERF_EN = {
+    "avg_power_w": "Avg power W",
+    "avg_hr": "Avg heart rate",
+    "avg_speed_kmh": "Avg speed km/h",
+    "cda": "CdA (if known)",
+    "comfort_1_10": "Comfort 1-10",
+    "pain_note": "Pain / discomfort",
+}
+
+
+def localized_fields(lang):
+    if lang != "en":
+        return SETUP_FIELDS, PERF_FIELDS
+    return ([(k, SETUP_EN[k]) for k, _ in SETUP_FIELDS], [(k, PERF_EN[k]) for k, _ in PERF_FIELDS])
+
+
+def load_ranges(lang="zh"):
     with open(RANGES_FILE, encoding="utf-8") as f:
-        return {k: v for k, v in json.load(f).items() if not k.startswith("_")}
+        out = {k: v for k, v in json.load(f).items() if not k.startswith("_")}
+    if lang == "en":
+        for v in out.values():
+            v["label"] = v.get("label_en", v["label"])
+    return out

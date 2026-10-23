@@ -16,6 +16,20 @@ TEXT = {
     ("forearm_angle", "low"): "前臂往下傾:可考慮延伸把上翹 5–10° 起步。",
     ("forearm_angle", "high"): "前臂上翹角偏大:注意 UCI 約 30° 上限與側風時的空力。",
 }
+TEXT_EN = {
+    ("knee_flexion_bdc", "low"): "Knee is too straight at BDC → saddle is too high. Lower the saddle.",
+    ("knee_flexion_bdc", "high"): "Knee is too bent at BDC → saddle is too low. Raise the saddle.",
+    ("hip_closed_tdc", "low"): "Hip angle too closed at TDC (hurts power and breathing) → raise the pads, move the saddle forward / steepen the seat angle, or use shorter cranks (re-check saddle height afterwards).",
+    ("knee_elbow_gap_mm", "low"): "Knee is too close to the elbow (may touch) → move the pads forward or up, or move the saddle back.",
+    ("shoulder_angle", "low"): "Shoulder angle too small (elbows tucked behind the shoulders) → move the pads forward or add reach.",
+    ("shoulder_angle", "high"): "Shoulder angle too large (arms reaching too far forward) → move the pads back or shorten reach.",
+    ("upper_arm_angle", "low"): "Upper arm leans backward → pads sit too far back (elbows behind the shoulders); move the pads forward.",
+    ("upper_arm_angle", "high"): "Upper arm leans too far forward → pads are too far forward; move the pads back.",
+    ("torso_angle", "low"): "Torso is very flat (<20°): aerodynamic, but more prone to neck/shoulder pain. Make sure you can hold it for the whole race.",
+    ("torso_angle", "high"): "Torso is fairly upright: if hip angle and comfort allow, lower the pads gradually.",
+    ("forearm_angle", "low"): "Forearms slope downward: consider tilting the extensions up 5–10° to start.",
+    ("forearm_angle", "high"): "Forearm tilt is large: mind the UCI limit of about 30° and aero in crosswinds.",
+}
 # 先處理座墊,再處理髖,最後手臂:一次只動一個變數
 PRIORITY = ["knee_flexion_bdc", "hip_closed_tdc", "knee_elbow_gap_mm", "shoulder_angle", "upper_arm_angle"]
 MIN_NOISE_DEG = 3.0  # 2D 姿態估計的典型誤差下限 (文獻 3-9°)
@@ -63,18 +77,18 @@ def saddle_delta_mm(result, ranges):
     return (d_target - g["hip_ankle_px"]) / px
 
 
-def _line(i):
-    return dict(key=i["key"], text=TEXT.get((i["key"], i["status"]), ""), deviation=round(i["deviation"], 1),
+def _line(i, lang="zh"):
+    return dict(key=i["key"], text=(TEXT_EN if lang == "en" else TEXT).get((i["key"], i["status"]), ""), deviation=round(i["deviation"], 1),
                 unit=i["unit"])
 
 
-def advise(result, ranges):
+def advise(result, ranges, lang="zh"):
     items = evaluate(result, ranges)
     off = [i for i in items if i["status"] in ("low", "high")]
     todo = [i for i in off if i["role"] == "fix"]
     todo.sort(key=lambda i: PRIORITY.index(i["key"]) if i["key"] in PRIORITY else 99)
-    lines = [_line(i) for i in todo if not i["within_noise"]]
-    hints = [_line(i) for i in off if i["role"] == "hint" and not i["within_noise"]]
+    lines = [_line(i, lang) for i in todo if not i["within_noise"]]
+    hints = [_line(i, lang) for i in off if i["role"] == "hint" and not i["within_noise"]]
     delta = saddle_delta_mm(result, ranges)
     out = dict(items=items, fix_first=lines[0] if lines else None, others=lines[1:], hints=hints,
                good=[i["label"] for i in items if i["status"] == "ok"],

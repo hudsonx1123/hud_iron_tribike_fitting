@@ -6,7 +6,7 @@ import numpy as np
 from flask import Flask, abort, jsonify, request, send_file, send_from_directory
 
 from fitting import advice, metrics, pose, store
-from fitting.config import DATA, PERF_FIELDS, ROOT, SETUP_FIELDS, load_ranges
+from fitting.config import DATA, ROOT, load_ranges, localized_fields
 
 app = Flask(__name__, static_folder=str(ROOT / "static"), static_url_path="/static")
 app.config["MAX_CONTENT_LENGTH"] = 2 * 1024**3
@@ -18,6 +18,10 @@ def _meta_or_404(sid):
     if not m:
         abort(404)
     return m
+
+
+def _lang():
+    return "en" if request.args.get("lang") == "en" else "zh"
 
 
 def _compute(sid):
@@ -34,7 +38,7 @@ def _compute(sid):
         px_per_mm = float(np.hypot(dx, dy) / sc["mm"])
     res = metrics.compute(lm, p["width"], p["height"], p["fps"], meta["side"], meta.get("facing", 1),
                           meta.get("range"), px_per_mm)
-    res["advice"] = advice.advise(res, load_ranges())
+    res["advice"] = advice.advise(res, load_ranges(_lang()), _lang())
     return res
 
 
@@ -50,7 +54,8 @@ def index():
 
 @app.get("/api/fields")
 def fields():
-    return jsonify(setup=SETUP_FIELDS, perf=PERF_FIELDS, ranges=load_ranges())
+    setup, perf = localized_fields(_lang())
+    return jsonify(setup=setup, perf=perf, ranges=load_ranges(_lang()))
 
 
 @app.get("/api/sessions")
