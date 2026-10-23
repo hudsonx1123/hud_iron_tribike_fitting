@@ -7,7 +7,7 @@ const PRO_BIG_GAP = 8; // 小於此差距視為雜訊(追車鏡頭與固定機�
 let PROS = { sessions: null, fields: null, youId: null };
 
 async function loadPros() {
-  const [ss, fl] = await Promise.all([fetch("/api/sessions").then((r) => r.json()), PROS.fields || fetch(langQS("/api/fields")).then((r) => r.json())]);
+  const [ss, fl] = await Promise.all([fetch("/api/sessions").then((r) => r.json()), fetch(langQS("/api/fields")).then((r) => r.json())]);
   PROS.sessions = ss.filter((s) => s.status === "ready" && s.summary);
   PROS.fields = fl;
   const mine = PROS.sessions.filter((s) => !s.pro).sort((a, b) => a.created.localeCompare(b.created));
