@@ -145,7 +145,7 @@ function renderPros() {
   h += rows.map((x) => {
     const d = x.yv - x.med, bigGap = Math.abs(d) >= PRO_BIG_GAP;
     const inRange = (x.r.low == null || x.yv >= x.r.low) && (x.r.high == null || x.yv <= x.r.high);
-    return `<div class="card prow"><div class="srow"><b>${esc(label(x))}</b><span class="hint">${t("pro.rowLine", { y: x.yv.toFixed(1), m: x.med.toFixed(1), c: bigGap ? "gapbig" : "", d: (d > 0 ? "+" : "") + d.toFixed(1) })}</span></div>
+    return `<div class="card prow"><div class="srow"><b${tipAttr(x.r.why)}>${esc(label(x))}</b><span class="hint">${t("pro.rowLine", { y: x.yv.toFixed(1), m: x.med.toFixed(1), c: bigGap ? "gapbig" : "", d: (d > 0 ? "+" : "") + d.toFixed(1) })}</span></div>
       <div class="hint">${esc(x.pm.desc)} ${tg(x.r)}${x.r.high != null || x.r.low != null ? (inRange ? t("pro.inRange") : t("pro.outRange")) : ""}</div>
       ${prosStrip(x.pm, { val: x.yv }, x.pv, x.r, w, C)}</div>`;
   }).join("");
@@ -153,7 +153,7 @@ function renderPros() {
   h += `<div class="card scroll"><table><tr><th>${t("pro.metric")}</th><th class="num">${esc(t("you"))}</th>` + pros.map((p) => `<th class="num" title="${esc(p.name)}">${esc(p.short || "?")}</th>`).join("") + `<th class="num">${t("pro.median")}</th><th class="num">${t("pro.gap")}</th></tr>` +
     rows.map((x) => {
       const d = x.yv - x.med;
-      return `<tr><td>${esc(label(x))}</td><td class="num yourv">${x.yv.toFixed(1)}</td>` +
+      return `<tr><td${tipAttr(x.r.why)}>${esc(label(x))}</td><td class="num yourv">${x.yv.toFixed(1)}</td>` +
         pros.map((p) => { const v = p.summary[x.pm.key]; return `<td class="num ${(p.lowconf || []).includes(x.pm.key) ? "lowv" : ""}">${v == null ? "—" : v.toFixed(1)}</td>`; }).join("") +
         `<td class="num">${x.med.toFixed(1)}</td><td class="num ${Math.abs(d) >= PRO_BIG_GAP ? "gapbig" : ""}">${d > 0 ? "+" : ""}${d.toFixed(1)}°</td></tr>`;
     }).join("") + `</table></div>`;

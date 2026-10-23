@@ -58,7 +58,7 @@ def evaluate(result, ranges):
         dev = 0.0
         if status in ("low", "high"):
             dev = low - v if status == "low" else v - high
-        items.append(dict(key=key, label=r["label"], unit=r["unit"], value=v, std=m["std"], n=m["n"],
+        items.append(dict(key=key, label=r["label"], why=r.get("why", ""), unit=r["unit"], value=v, std=m["std"], n=m["n"],
                           low=low, high=high, ideal=r.get("ideal"),
                           confidence=r["confidence"], role=r.get("role", "fix"), status=status, deviation=dev,
                           within_noise=status in ("low", "high") and dev <= noise))

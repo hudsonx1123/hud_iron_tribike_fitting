@@ -6,7 +6,7 @@ import numpy as np
 from flask import Flask, abort, jsonify, request, send_file, send_from_directory
 
 from fitting import advice, metrics, pose, store
-from fitting.config import DATA, ROOT, load_ranges, localized_fields
+from fitting.config import DATA, ROOT, SETUP_DEFAULTS, load_ranges, localized_fields
 
 app = Flask(__name__, static_folder=str(ROOT / "static"), static_url_path="/static")
 app.config["MAX_CONTENT_LENGTH"] = 2 * 1024**3
@@ -55,7 +55,7 @@ def index():
 @app.get("/api/fields")
 def fields():
     setup, perf = localized_fields(_lang())
-    return jsonify(setup=setup, perf=perf, ranges=load_ranges(_lang()))
+    return jsonify(setup=setup, perf=perf, ranges=load_ranges(_lang()), setup_defaults=SETUP_DEFAULTS)
 
 
 @app.get("/api/sessions")

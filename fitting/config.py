@@ -35,6 +35,9 @@ PERF_FIELDS = [
 ]
 
 
+# 上傳表單的預設值(Speedmax CF 8 出場曲柄 165 mm)
+SETUP_DEFAULTS = {"crank_length_mm": "165"}
+
 SETUP_EN = {
     "saddle_height_mm": "Saddle height (BB to saddle top) mm",
     "saddle_setback_mm": "Saddle setback mm",
@@ -69,4 +72,5 @@ def load_ranges(lang="zh"):
     if lang == "en":
         for v in out.values():
             v["label"] = v.get("label_en", v["label"])
+            v["why"] = v.get("why_en", v.get("why", ""))
     return out

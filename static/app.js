@@ -17,6 +17,31 @@ const S = { sid: null, info: null, lm: null, frame: 0, met: null, mode: "edit", 
 const IDX = { left: { ear: 7, shoulder: 11, elbow: 13, wrist: 15, hip: 23, knee: 25, ankle: 27, heel: 29, toe: 31 },
               right: { ear: 8, shoulder: 12, elbow: 14, wrist: 16, hip: 24, knee: 26, ankle: 28, heel: 30, toe: 32 } };
 
+// ---------- tooltip (指標說明) ----------
+const tipAttr = (w) => (w ? ` class="tip" data-tip="${esc(w)}"` : "");
+(() => {
+  const box = document.createElement("div");
+  box.id = "tipbox"; box.hidden = true; document.body.appendChild(box);
+  const place = (e) => {
+    const pad = 14, w = box.offsetWidth, h = box.offsetHeight;
+    let x = e.clientX + pad, y = e.clientY + pad;
+    if (x + w > innerWidth - 8) x = Math.max(8, e.clientX - w - pad);
+    if (y + h > innerHeight - 8) y = Math.max(8, e.clientY - h - pad);
+    box.style.left = x + "px"; box.style.top = y + "px";
+  };
+  document.addEventListener("mouseover", (e) => {
+    const el = e.target.closest && e.target.closest("[data-tip]");
+    if (!el) return;
+    box.textContent = el.dataset.tip; box.hidden = false; place(e);
+  });
+  document.addEventListener("mousemove", (e) => { if (!box.hidden) place(e); });
+  document.addEventListener("mouseout", (e) => {
+    const el = e.target.closest && e.target.closest("[data-tip]");
+    if (el && !(e.relatedTarget && el.contains(e.relatedTarget))) box.hidden = true;
+  });
+  document.addEventListener("scroll", () => (box.hidden = true), true);
+})();
+
 // ---------- tabs ----------
 function showTab(t) {
   document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("active", b.dataset.tab === t));
@@ -135,7 +160,7 @@ function renderMetrics() {
       const tgt = i.low !== null && i.high !== null ? `${i.low}–${i.high}${i.unit}` :
         i.low !== null ? `≥ ${i.low}${i.unit}` : i.high !== null ? `≤ ${i.high}${i.unit}` : t("m.track");
       const cls = i.within_noise ? "noise" : i.status;
-      return `<tr><td>${esc(i.label)}${i.confidence === "rule_of_thumb" ? ` <span class="tag" title="${esc(t("m.ruleTitle"))}">${t("m.rule")}</span>` : ""}</td>
+      return `<tr><td${tipAttr(i.why)}>${esc(i.label)}${i.confidence === "rule_of_thumb" ? ` <span class="tag" title="${esc(t("m.ruleTitle"))}">${t("m.rule")}</span>` : ""}</td>
         <td class="num ${cls}">${f1(i.value)}${esc(i.unit)} <span class="hint">±${f1(i.std)} (${i.n})</span></td><td class="hint">${tgt}</td></tr>`;
     }).join("") + `</table></div>`;
   el.innerHTML = h;
@@ -325,7 +350,7 @@ async function loadCompare(ids) {
     const num = vals.map((v) => parseFloat(v));
     const d = delta && num.length > 1 && isFinite(num[0]) && isFinite(num.at(-1)) ? (num.at(-1) - num[0]) : null;
     if (vals.every((v) => v === undefined || v === "")) return "";
-    return `<tr><td>${esc(labelOf(k))}</td>${vals.map((v) => `<td class="num">${v === undefined ? "–" : isFinite(parseFloat(v)) && delta ? f1(v) : esc(v)}</td>`).join("")}
+    return `<tr><td${tipAttr(R[k] && R[k].why)}>${esc(labelOf(k))}</td>${vals.map((v) => `<td class="num">${v === undefined ? "–" : isFinite(parseFloat(v)) && delta ? f1(v) : esc(v)}</td>`).join("")}
       <td class="num hint">${d === null ? "" : (d > 0 ? "+" : "") + f1(d)}</td></tr>`;
   }).join("");
   const mkeys = Object.keys(R).concat(["leg_extension_mm"]);
@@ -346,7 +371,7 @@ async function setLang(l) {
   try { localStorage.setItem("lang", l); } catch (e) { /* ignore */ }
   applyStaticI18n();
   FIELDS = await api(langQS("/api/fields"));
-  $("#setup-fields").innerHTML = fieldInputs(FIELDS.setup, setupVals, "setup");
+  $("#setup-fields").innerHTML = fieldInputs(FIELDS.setup, { ...FIELDS.setup_defaults, ...setupVals }, "setup");
   $("#perf-fields").innerHTML = fieldInputs(FIELDS.perf, perfVals, "perf");
   if (S.info) {
     $("#a-setup").innerHTML = fieldInputs(FIELDS.setup, aSetup, "setup");
@@ -364,7 +389,7 @@ $("#lang-btn").onclick = () => setLang(LANG === "en" ? "zh" : "en");
 (async () => {
   applyStaticI18n();
   FIELDS = await api(langQS("/api/fields"));
-  $("#setup-fields").innerHTML = fieldInputs(FIELDS.setup, {}, "setup");
+  $("#setup-fields").innerHTML = fieldInputs(FIELDS.setup, FIELDS.setup_defaults, "setup");
   $("#perf-fields").innerHTML = fieldInputs(FIELDS.perf, {}, "perf");
   setMode("edit");
   loadList();
