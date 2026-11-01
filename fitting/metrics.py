@@ -108,3 +108,41 @@ def compute(lm, w, h, fps, side, facing, rng=None, px_per_mm=None):
                    knee_int=float(np.median(S["knee_int"][bdc])))
     return dict(metrics={k: v for k, v in m.items() if v}, bdc=bdc.tolist(), tdc=tdc.tolist(),
                 cadence=cadence, geo=geo, px_per_mm=px_per_mm, range=[a, b])
+
+
+def _rolling_median(x, k):
+    from numpy.lib.stride_tricks import sliding_window_view
+    return np.median(sliding_window_view(np.pad(x, k // 2, mode="edge"), k)[: len(x)], axis=1)
+
+
+def suggest_range(lm, w, h, fps, side, facing, dev_deg=15.0, glob_deg=15.0, dev_len=0.25, pad_s=0.3):
+    """Longest tracking-stable stretch → ([start, end], bad_fraction).
+    A frame is bad when torso/arm angles or torso length jump away from their ~2 s rolling median
+    (pose tracker lost the rider), or sit far from the whole-clip median (tracker locked onto a wrong
+    but steady pose; the rider's posture is nearly static). Bad frames are padded by pad_s."""
+    S = series(lm, w, h, side, facing)
+    k = int(2 * fps) | 1
+    bad = np.zeros(len(lm), bool)
+    for key in ("torso", "upper_arm", "forearm", "elbow_int"):
+        bad |= np.abs(S[key] - _rolling_median(S[key], k)) > dev_deg
+        bad |= np.abs(S[key] - np.median(S[key])) > glob_deg
+    ix = SIDES[side]
+    px = lm[:, :, :2] * np.array([w, h])
+    tl = np.linalg.norm(px[:, ix["shoulder"]] - px[:, ix["hip"]], axis=1)
+    bad |= np.abs(tl / (_rolling_median(tl, k) + 1e-9) - 1) > dev_len
+    p = int(pad_s * fps)
+    padded = bad.copy()
+    for i in np.flatnonzero(bad):
+        padded[max(0, i - p): i + p + 1] = True
+    best, i = (0, -1), 0
+    while i < len(padded):
+        if padded[i]:
+            i += 1
+            continue
+        j = i
+        while j < len(padded) and not padded[j]:
+            j += 1
+        if j - i > best[1] - best[0] + 1:
+            best = (i, j - 1)
+        i = j
+    return [int(best[0]), int(best[1])], float(padded.mean())

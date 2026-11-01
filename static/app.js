@@ -318,6 +318,13 @@ const setRange = async (r) => { S.info.meta = await api("/api/sessions/" + S.sid
 $("#b-rs").onclick = () => { const r = S.info.meta.range || [0, S.info.n - 1]; setRange([S.frame, Math.max(S.frame, r[1])]); };
 $("#b-re").onclick = () => { const r = S.info.meta.range || [0, S.info.n - 1]; setRange([Math.min(S.frame, r[0]), S.frame]); };
 $("#b-rr").onclick = () => setRange(null);
+$("#b-auto").onclick = async () => {
+  const s = await api(`/api/sessions/${S.sid}/suggest-range`);
+  if (s.bad_fraction < 0.02) return alert(t("an.autoClean"));
+  const [a, b] = s.range;
+  if (b - a < 100) return alert(t("an.autoShort", { a, b }));
+  if (confirm(t("an.autoAsk", { a, b, p: Math.round(s.bad_fraction * 100) }))) setRange(s.range);
+};
 $("#b-reset").onclick = async () => {
   await api(`/api/sessions/${S.sid}/override/${S.frame}`, { method: "DELETE" });
   S.lm = await api(`/api/sessions/${S.sid}/landmarks`); await refreshMetrics(); goFrame(S.frame);

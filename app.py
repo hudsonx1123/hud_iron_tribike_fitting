@@ -165,6 +165,17 @@ def get_metrics(sid):
     return jsonify(r)
 
 
+@app.get("/api/sessions/<sid>/suggest-range")
+def suggest_range(sid):
+    meta = _meta_or_404(sid)
+    if meta["status"] != "ready":
+        abort(409)
+    p = store.load_pose(sid)
+    rng, bad = metrics.suggest_range(store.effective_landmarks(sid), p["width"], p["height"], p["fps"], meta["side"],
+                                     meta.get("facing", 1))
+    return jsonify(range=rng, bad_fraction=round(bad, 3), n=p["n"])
+
+
 @app.get("/api/compare")
 def compare():
     ids = [i for i in request.args.get("ids", "").split(",") if i]
