@@ -155,6 +155,9 @@ function renderMetrics() {
   if (a.others.length) h += `<div class="card"><b>${t("m.others")}</b><ul>${a.others.map((o) => `<li>${esc(o.text)}</li>`).join("")}</ul></div>`;
   if (a.hints.length) h += `<div class="card"><b>${t("m.hints")}</b><span class="hint">${t("m.hintsNote")}</span><ul>${a.hints.map((o) => `<li>${esc(o.text)}</li>`).join("")}</ul></div>`;
   if (a.noise_note.length) h += `<div class="hint noise">${t("m.noise")}${a.noise_note.map(esc).join(t("sep"))}</div>`;
+  if (!S.info.meta.pro) {
+    h += `<div class="card"><label class="chkrow"><input type="checkbox" id="pro-toggle" class="chk" ${proCmpOn() ? "checked" : ""}> <b>${t("m.proToggle")}</b></label><div id="pro-cmp-body"></div></div>`;
+  }
   h += `<div class="card scroll"><table><tr><th>${t("m.metric")}</th><th class="num">${t("m.value")}</th><th>${t("m.target")}</th></tr>` +
     a.items.map((i) => {
       const tgt = i.low !== null && i.high !== null ? `${i.low}–${i.high}${i.unit}` :
@@ -164,6 +167,8 @@ function renderMetrics() {
         <td class="num ${cls}">${f1(i.value)}${esc(i.unit)} <span class="hint">±${f1(i.std)} (${i.n})</span></td><td class="hint">${tgt}</td></tr>`;
     }).join("") + `</table></div>`;
   el.innerHTML = h;
+  const tg = $("#pro-toggle");
+  if (tg) { tg.onchange = () => { proCmpSet(tg.checked); renderProCmp(); }; renderProCmp(); }
 }
 
 // ---------- canvas ----------

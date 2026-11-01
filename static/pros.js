@@ -16,6 +16,17 @@ async function loadPros() {
   renderPros();
 }
 
+// 你(summary: {key: value})與各選手逐項對照;缺資料的指標略過
+function prosRows(summary, pros, ranges) {
+  return PRO_METRICS.map((pm) => {
+    const r = ranges[pm.key] || {};
+    const yv = summary[pm.key];
+    const pv = pros.filter((p) => p.summary[pm.key] != null).map((p) => ({ k: p.short || p.name[0], val: p.summary[pm.key], low: (p.lowconf || []).includes(pm.key), name: p.name }));
+    if (yv == null || !pv.length) return null;
+    return { pm, r, yv, pv, med: prosMedian(pv.map((p) => p.val)) };
+  }).filter(Boolean);
+}
+
 function prosColors() {
   const cs = getComputedStyle(document.documentElement), g = (n) => cs.getPropertyValue(n).trim();
   return { you: g("--you") || "#e2561f", pro: g("--acc"), mut: g("--mut"), line: g("--line"), card: g("--card"), band: g("--okbg") || "#cfe7e2", bandLine: g("--ok") };
@@ -122,13 +133,7 @@ function renderPros() {
   }
   const C = prosColors(), ranges = PROS.fields.ranges;
   const w = Math.max(280, out.clientWidth - 30);
-  const rows = PRO_METRICS.map((pm) => {
-    const r = ranges[pm.key] || {};
-    const yv = you.summary[pm.key];
-    const pv = pros.filter((p) => p.summary[pm.key] != null).map((p) => ({ k: p.short || p.name[0], val: p.summary[pm.key], low: (p.lowconf || []).includes(pm.key), name: p.name }));
-    if (yv == null || !pv.length) return null;
-    return { pm, r, yv, pv, med: prosMedian(pv.map((p) => p.val)) };
-  }).filter(Boolean);
+  const rows = prosRows(you.summary, pros, ranges);
   const label = (x) => x.r.label || x.pm.key;
   const tg = (r) => (r.low == null && r.high == null ? t("pro.trackOnly") : r.high == null ? t("pro.tgGe", { v: r.low }) : r.low == null ? t("pro.tgLe", { v: r.high }) : t("pro.tgBetween", { a: r.low, b: r.high }));
 
@@ -171,3 +176,31 @@ let _prosRt;
 addEventListener("resize", () => { if (!$("#tab-pros").hidden) { clearTimeout(_prosRt); _prosRt = setTimeout(renderPros, 120); } });
 matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => { if (PROS.sessions && !$("#tab-pros").hidden) renderPros(); });
 if (location.hash === "#pros") showTab("pros");
+
+// ---------- 分析頁的「與職業選手對照」區塊(預設關閉,只供參考,不影響「先修這個」) ----------
+const PROCMP_KEY = "proCmpOn";
+const proCmpOn = () => { try { return localStorage.getItem(PROCMP_KEY) === "1"; } catch (e) { return false; } };
+const proCmpSet = (on) => { try { localStorage.setItem(PROCMP_KEY, on ? "1" : "0"); } catch (e) { /* 無法存取就只在本次有效 */ } };
+let _proCmpPros = null;
+
+async function renderProCmp() {
+  const body = $("#pro-cmp-body");
+  if (!body) return;
+  if (!proCmpOn()) { body.innerHTML = ""; return; }
+  if (!_proCmpPros) {
+    body.innerHTML = `<p class="hint">${t("m.proLoading")}</p>`;
+    _proCmpPros = (await fetch("/api/sessions").then((r) => r.json())).filter((s) => s.pro && s.status === "ready" && s.summary);
+  }
+  const el = $("#pro-cmp-body");
+  if (!el || !proCmpOn()) return;
+  const you = Object.fromEntries(Object.entries(S.met.metrics).map(([k, v]) => [k, v.value]));
+  const rows = prosRows(you, _proCmpPros, FIELDS.ranges);
+  if (!rows.length) { el.innerHTML = `<p class="hint">${t("m.proNone")}</p>`; return; }
+  const label = (x) => x.r.label || x.pm.key;
+  el.innerHTML = `<p class="hint" style="margin:6px 0">${t("m.proNote", { g: PRO_BIG_GAP })}</p>
+    <table><tr><th>${t("pro.metric")}</th><th class="num">${esc(t("you"))}</th><th class="num">${t("pro.median")}</th><th class="num">${t("pro.gap")}</th></tr>` +
+    rows.map((x) => { const d = x.yv - x.med; return `<tr><td${tipAttr(x.r.why)}>${esc(label(x))}</td><td class="num yourv">${x.yv.toFixed(1)}</td><td class="num">${x.med.toFixed(1)}</td>
+      <td class="num ${Math.abs(d) >= PRO_BIG_GAP ? "gapbig" : ""}">${d > 0 ? "+" : ""}${d.toFixed(1)}°</td></tr>`; }).join("") + `</table>
+    <b style="display:block;margin:10px 0 6px">${t("pro.plan")}</b><ol class="plan">` +
+    prosPlan(rows, you).map((st) => `<li><span class="ptag ${st.t}">${esc(st.tag)}</span><div><b>${esc(st.h)}</b><div class="hint">${esc(st.p)}</div></div></li>`).join("") + `</ol>`;
+}
