@@ -155,6 +155,7 @@ function renderMetrics() {
   if (a.others.length) h += `<div class="card"><b>${t("m.others")}</b><ul>${a.others.map((o) => `<li>${esc(o.text)}</li>`).join("")}</ul></div>`;
   if (a.hints.length) h += `<div class="card"><b>${t("m.hints")}</b><span class="hint">${t("m.hintsNote")}</span><ul>${a.hints.map((o) => `<li>${esc(o.text)}</li>`).join("")}</ul></div>`;
   if (a.noise_note.length) h += `<div class="hint noise">${t("m.noise")}${a.noise_note.map(esc).join(t("sep"))}</div>`;
+  h += aeroCard();
   if (!S.info.meta.pro) {
     h += `<div class="card"><label class="chkrow"><input type="checkbox" id="pro-toggle" class="chk" ${proCmpOn() ? "checked" : ""}> <b>${t("m.proToggle")}</b></label><div id="pro-cmp-body"></div></div>`;
   }
@@ -217,10 +218,11 @@ function draw() {
     const label = (p, txt) => { ctx.font = `${15 * u}px sans-serif`; const x = X(p) + 12 * u, y = Y(p) - 10 * u;
       ctx.fillStyle = "rgba(0,0,0,.65)"; const w = ctx.measureText(txt).width; ctx.fillRect(x - 3 * u, y - 15 * u, w + 6 * u, 20 * u);
       ctx.fillStyle = "#fff"; ctx.fillText(txt, x, y); };
-    label(P.knee, `${t("cv.knee")} ${(180 - ang("hip", "knee", "ankle")).toFixed(0)}°`);
-    label(P.hip, `${t("cv.hip")} ${ang("shoulder", "hip", "knee").toFixed(0)}°`);
-    label(P.elbow, `${t("cv.elbow")} ${ang("shoulder", "elbow", "wrist").toFixed(0)}°`);
-    line("knee", "elbow", "#f472b6", 2, [8 * u, 6 * u]);
+    const clean = typeof AERO !== "undefined" && AERO.on; // 風洞模式只留關節點,角度標籤交給風洞的分區標籤
+    if (!clean) label(P.knee, `${t("cv.knee")} ${(180 - ang("hip", "knee", "ankle")).toFixed(0)}°`);
+    if (!clean) label(P.hip, `${t("cv.hip")} ${ang("shoulder", "hip", "knee").toFixed(0)}°`);
+    if (!clean) label(P.elbow, `${t("cv.elbow")} ${ang("shoulder", "elbow", "wrist").toFixed(0)}°`);
+    if (!clean) line("knee", "elbow", "#f472b6", 2, [8 * u, 6 * u]);
     if (S.met.px_per_mm) {
       const d = Math.hypot((P.knee[0] - P.elbow[0]) * W, (P.knee[1] - P.elbow[1]) * H) / S.met.px_per_mm;
       label([(P.knee[0] + P.elbow[0]) / 2, (P.knee[1] + P.elbow[1]) / 2], `${d.toFixed(0)} mm`);

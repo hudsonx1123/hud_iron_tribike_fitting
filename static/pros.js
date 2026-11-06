@@ -163,8 +163,7 @@ function renderPros() {
         `<td class="num">${x.med.toFixed(1)}</td><td class="num ${Math.abs(d) >= PRO_BIG_GAP ? "gapbig" : ""}">${d > 0 ? "+" : ""}${d.toFixed(1)}°</td></tr>`;
     }).join("") + `</table></div>`;
 
-  h += `<div class="card"><b>${t("pro.plan")}</b><p class="hint" style="margin:4px 0 8px">${t("pro.planNote")}</p><ol class="plan">` +
-    prosPlan(rows, you).map((st) => `<li><span class="ptag ${st.t}">${esc(st.tag)}</span><div><b>${esc(st.h)}</b><div class="hint">${esc(st.p)}</div></div></li>`).join("") + `</ol></div>`;
+  h += `<div class="card"><p class="hint" style="margin:0">${t("pro.planMoved")}</p></div>`;
 
   h += `<div class="card"><b>${t("pro.limits")}</b><ul class="hint" style="margin:6px 0 0;padding-left:1.2em">
     <li>${t("pro.l1", { g: PRO_BIG_GAP })}</li><li>${t("pro.l2")}</li><li>${t("pro.l3")}</li><li>${t("pro.l4")}</li></ul></div>`;
