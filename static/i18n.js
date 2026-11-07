@@ -4,7 +4,7 @@
 // 伺服器端文字(欄位名稱、建議)由 ?lang= 參數決定,見 app.py。
 const I18N = {
   zh: {
-    "app.title": "三鐵車 Fitting 分析",
+    "app.title": "HudIRON 三鐵車 Fitting 分析",
     "tab.list": "騎乘紀錄", "tab.analyze": "分析", "tab.compare": "比較", "tab.pros": "職業對照",
     "up.title": "上傳新影片", "up.name": "名稱", "up.video": "側面影片",
     "up.ph": "例如:10/16 外騎 座墊+5mm",
@@ -100,7 +100,7 @@ const I18N = {
     "err.開啟": "無法開啟影片", "err.偵測": "整支影片都偵測不到人",
   },
   en: {
-    "app.title": "Tri-Bike Fitting Analysis",
+    "app.title": "HudIRON Tri-Bike Fitting Analysis",
     "tab.list": "Rides", "tab.analyze": "Analyze", "tab.compare": "Compare", "tab.pros": "Pro Compare",
     "up.title": "Upload new video", "up.name": "Name", "up.video": "Side-view video",
     "up.ph": "e.g. 10/16 outdoor, saddle +5mm",

@@ -4,3 +4,7 @@ models/
 data/
 work_folder/
 *.pyc
+
+img/
+*.part
+.DS_Store

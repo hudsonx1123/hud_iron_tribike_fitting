@@ -1,6 +1,9 @@
-"""Tri-bike fitting: local web app.  Run: .venv/bin/python app.py  → http://localhost:5000"""
+"""HudIRON Tri-Bike Fitting Analysis: local web app.  Run: python app.py  → http://localhost:5000 (auto-picks a free port)"""
 import json
+import os
+import socket
 import threading
+import webbrowser
 
 import numpy as np
 from flask import Flask, abort, jsonify, request, send_file, send_from_directory
@@ -189,6 +192,19 @@ def compare():
     return jsonify(rows)
 
 
+def _free_port(start):
+    for p in range(start, start + 20):
+        with socket.socket() as s:
+            if s.connect_ex(("127.0.0.1", p)) != 0:  # nothing is listening → free
+                return p
+    return start
+
+
 if __name__ == "__main__":
     DATA.mkdir(parents=True, exist_ok=True)
-    app.run(host="127.0.0.1", port=5000, debug=False, threaded=True)
+    port = _free_port(int(os.environ.get("PORT", "5000")))
+    url = f"http://localhost:{port}"
+    print(f"\n  HudIRON Tri-Bike Fitting → {url}\n  (Ctrl+C to stop)\n", flush=True)
+    if os.environ.get("NO_BROWSER") != "1":
+        threading.Timer(1.2, lambda: webbrowser.open(url)).start()
+    app.run(host="127.0.0.1", port=port, debug=False, threaded=True)

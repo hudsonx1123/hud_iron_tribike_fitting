@@ -7,6 +7,7 @@ from mediapipe.tasks.python import BaseOptions, vision
 
 from . import store
 from .config import MAX_FRAME_WIDTH, MODEL, SIDES
+from .model_fetch import ensure_model
 
 
 def analyze(sid, video_path):
@@ -21,6 +22,7 @@ def analyze(sid, video_path):
         fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
         total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) or 1
 
+        ensure_model(MODEL)
         opts = vision.PoseLandmarkerOptions(
             base_options=BaseOptions(model_asset_path=str(MODEL)),
             running_mode=vision.RunningMode.VIDEO,
